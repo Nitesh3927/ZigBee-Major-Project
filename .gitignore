@@ -1,6 +1,8 @@
 
 .devcontainer
 build
+managed_components
+.cache
 
 sdkconfig.defaults.esp32
 sdkconfig.defaults.esp32c3
@@ -8,3 +10,4 @@ sdkconfig.defaults.esp32c5
 sdkconfig.defaults.esp32c6
 sdkconfig.defaults.esp32s2
 sdkconfig.defaults.esp32s3
+/ControlLogicExploration
