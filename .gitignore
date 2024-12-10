@@ -19,3 +19,5 @@ IDF_framwork/HA_on_off_switch/.vscode/settings.json
 IDF_framwork/HA_on_off_switch/sdkconfig
 IDF_framwork/HA_on_off_switch/sdkconfig.defaults
 IDF_framwork/HA_on_off_switch/sdkconfig.old
+*.json
+*.md
