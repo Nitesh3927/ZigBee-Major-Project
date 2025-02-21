@@ -108,6 +108,8 @@ static void esp_zb_buttons_handler(switch_func_pair_t *button_func_pair)
             esp_zb_zcl_attribute_t attrs = {2, {ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING, sizeof(value), value}};
             esp_zb_zcl_write_attr_cmd_t cmd_req = {
                 .zcl_basic_cmd.src_endpoint = HA_ONOFF_SWITCH_ENDPOINT,
+                // .zcl_basic_cmd.dst_addr_u.addr_short = 0xFFFF, // Broadcast address
+                // .address_mode = ESP_ZB_APS_ADDR_MODE_16_GROUP_ENDP_NOT_PRESENT,
                 .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
                 .clusterID = CUSTOM_CLUSTER_ID,
                 .attr_number = 1,

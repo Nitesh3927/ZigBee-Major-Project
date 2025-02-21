@@ -77,7 +77,7 @@ static void esp_zb_buttons_handler(switch_func_pair_t *button_func_pair)
         uint8_t value[CUSTOM_STRING_MAX_SIZE];
         value[0] = CUSTOM_STRING_MAX_SIZE - 1;
         for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
-            value[i] = i;
+            value[i] = 'A';
         }
         esp_zb_zcl_custom_cluster_cmd_req_t custom_req;
         custom_req.zcl_basic_cmd.src_endpoint = HA_ESP_LIGHT_ENDPOINT;
