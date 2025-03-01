@@ -16,127 +16,43 @@
 #if defined ZB_ED_ROLE
 #error Define ZB_COORDINATOR_ROLE in idf.py menuconfig to compile light switch source code.
 #endif
+
+static const char *TAG = "ESP_ZB_ON_OFF_SWITCH";
+
+#define CUSTOM_CLUSTER_ID 0xFC00
+#define CUSTOM_STRING_MAX_SIZE 5
+
+static switch_func_pair_t button_func_pair[] = {
+    {GPIO_INPUT_IO_TOGGLE_SWITCH, SWITCH_ONOFF_TOGGLE_CONTROL}
+};
+
 typedef struct light_bulb_device_params_s {
     esp_zb_ieee_addr_t ieee_addr;
     uint8_t  endpoint;
     uint16_t short_addr;
 } light_bulb_device_params_t;
 
-static switch_func_pair_t button_func_pair[] = {
-    {GPIO_INPUT_IO_TOGGLE_SWITCH, SWITCH_ONOFF_TOGGLE_CONTROL}
-};
-
-static const char *TAG = "ESP_ZB_ON_OFF_SWITCH";
-
-#define CUSTOM_CLUSTER_ID 0xFC00
-#define CUSTOM_STRING_MAX_SIZE 127
-
-void *esp_zb_zcl_attr_string_array_value_create(esp_zb_zcl_attr_type_t type, void *array, uint32_t elem_size, uint32_t elem_count)
-{
-    uint8_t *value = NULL;
-    uint8_t offset = 0;
-    switch (type) {
-    case ESP_ZB_ZCL_ATTR_TYPE_LONG_OCTET_STRING:
-    case ESP_ZB_ZCL_ATTR_TYPE_LONG_CHAR_STRING:
-    case ESP_ZB_ZCL_ATTR_TYPE_ARRAY:
-    case ESP_ZB_ZCL_ATTR_TYPE_16BIT_ARRAY:
-    case ESP_ZB_ZCL_ATTR_TYPE_32BIT_ARRAY:
-        value = malloc(sizeof(uint16_t) + elem_size * elem_count);
-        memcpy(value + offset, &elem_count, sizeof(uint16_t));
-        offset += sizeof(uint16_t);
-        break;
-    case ESP_ZB_ZCL_ATTR_TYPE_OCTET_STRING:
-    case ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING:
-        value = malloc(sizeof(uint8_t) + elem_size * elem_count);
-        memcpy(value + offset, &elem_count, sizeof(uint8_t));
-        offset += sizeof(uint8_t);
-        break;
-    default:
-        ESP_LOGW(TAG, "The data type(0x%x) is not array or string, failed to create it", type);
-        value = NULL;
-        break;
-    }
-    memcpy(value + offset, array, elem_count * elem_size);
-    return value;
-};
-
-void esp_zb_zcl_attr_string_array_value_free(uint8_t *array)
-{
-    if (array) {
-        free(array);
-    }
-}
-
 static void esp_zb_buttons_handler(switch_func_pair_t *button_func_pair)
 {
-    if (button_func_pair->func == SWITCH_ONOFF_TOGGLE_CONTROL) {
-        /* implemented light switch toggle functionality */
-        // switch (flag) {
-        // case 0: {
-            // uint32_t message[] = {0x11223344, 0x44332211};
-            // uint8_t *value = esp_zb_zcl_attr_string_array_value_create(ESP_ZB_ZCL_ATTR_TYPE_32BIT_ARRAY, message, sizeof(message[0]),
-            //                                                            sizeof(message) / sizeof(uint32_t));
-            // esp_zb_zcl_custom_cluster_cmd_req_t custom_req;
-            // uint8_t value[CUSTOM_STRING_MAX_SIZE];
-            // value[0] = CUSTOM_STRING_MAX_SIZE - 1;
-            // for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
-            //     value[i] = i;
-            // }
-            // custom_req.zcl_basic_cmd.src_endpoint = HA_ONOFF_SWITCH_ENDPOINT;
-            // custom_req.zcl_basic_cmd.dst_endpoint = 10;
-            // custom_req.zcl_basic_cmd.dst_addr_u.addr_short = 0xffff;
-            // custom_req.address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT;
-            // custom_req.cluster_id = CUSTOM_CLUSTER_ID;
-            // custom_req.custom_cmd_id = 0x01;
-            // custom_req.profile_id = ESP_ZB_AF_HA_PROFILE_ID;
-            // custom_req.direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_SRV;
-            // custom_req.data.type = ESP_ZB_ZCL_ATTR_TYPE_32BIT_ARRAY;
-            // custom_req.data.value = value;
-            // esp_zb_zcl_custom_cluster_cmd_req(&custom_req);
-            // ESP_EARLY_LOGI(TAG, "Send 'specified custom number' command");
-            // esp_zb_zcl_attr_string_array_value_free(value);
-        //     flag = 1;
-        //     break;
-        // }
-        // case 1: {
-            // printf("Short addr0x%04x", esp_zb_get_short_address());
-            uint8_t value[CUSTOM_STRING_MAX_SIZE];
-            value[0] = CUSTOM_STRING_MAX_SIZE - 1;
-            for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
-                value[i] = i;
-            }
-            esp_zb_zcl_attribute_t attrs = {2, {ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING, sizeof(value), value}};
-            esp_zb_zcl_write_attr_cmd_t cmd_req = {
-                .zcl_basic_cmd.src_endpoint = HA_ONOFF_SWITCH_ENDPOINT,
-                // .zcl_basic_cmd.dst_addr_u.addr_short = 0xFFFF, // Broadcast address
-                // .address_mode = ESP_ZB_APS_ADDR_MODE_16_GROUP_ENDP_NOT_PRESENT,
-                .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
-                .clusterID = CUSTOM_CLUSTER_ID,
-                .attr_number = 1,
-                .attr_field = &attrs,
-            };
-            esp_zb_zcl_write_attr_cmd_req(&cmd_req);
-            ESP_LOGI(TAG, "Send 'write large data(%d)' command", sizeof(value));
-    //         flag = 2;
-    //         break;
-    //     }
-    //     case 2: {
-    //         uint16_t attrs = {0x02};
-    //         esp_zb_zcl_read_attr_cmd_t cmd_req = {
-    //             .zcl_basic_cmd.src_endpoint = HA_ONOFF_SWITCH_ENDPOINT,
-    //             .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
-    //             .clusterID = CUSTOM_CLUSTER_ID,
-    //             .attr_number = 1,
-    //             .attr_field = &attrs,
-    //         };
-    //         esp_zb_zcl_read_attr_cmd_req(&cmd_req);
-    //         ESP_EARLY_LOGI(TAG, "Send 'read large attr(%d)' command", attrs);
-    //         flag = 0;
-    //         break;
-    //     }
-    //     default:
-    //         break;
-    //     }
+    uint8_t value[CUSTOM_STRING_MAX_SIZE];
+    value[0] = CUSTOM_STRING_MAX_SIZE - 1;
+    for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
+        value[i] = 'A';
+    }
+    esp_zb_zcl_custom_cluster_cmd_req_t custom_req;
+    custom_req.zcl_basic_cmd.src_endpoint = HA_ONOFF_SWITCH_ENDPOINT;
+    custom_req.zcl_basic_cmd.dst_endpoint = 10;
+    custom_req.zcl_basic_cmd.dst_addr_u.addr_short = 0xffff;
+    custom_req.address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT;
+    custom_req.cluster_id = CUSTOM_CLUSTER_ID;
+    custom_req.custom_cmd_id = 0x01;
+    custom_req.profile_id = ESP_ZB_AF_HA_PROFILE_ID;
+    custom_req.direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_SRV;
+    custom_req.data.type = ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING;
+    custom_req.data.value = value;
+    for (int i = 0; i < 1000; i++) {
+        esp_zb_zcl_custom_cluster_cmd_req(&custom_req);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
@@ -159,7 +75,6 @@ static void bind_cb(esp_zb_zdp_status_t zdo_status, void *user_ctx)
 static void user_find_cb(esp_zb_zdp_status_t zdo_status, uint16_t addr, uint8_t endpoint, void *user_ctx)
 {
     if (zdo_status == ESP_ZB_ZDP_STATUS_SUCCESS) {
-        /* Bound the light device to its own bind table. */
         esp_zb_zdo_bind_req_param_t bind_req;
         light_bulb_device_params_t *light = (light_bulb_device_params_t *)malloc(sizeof(light_bulb_device_params_t));
         light->endpoint = endpoint;
@@ -233,101 +148,19 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
     }
 }
 
-// static esp_err_t zb_write_resp_handler(const esp_zb_zcl_cmd_write_attr_resp_message_t *message)
-// {
-//     ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
-//     ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
-//                         message->info.status);
-//     ESP_LOGI(TAG, "Write attribute successfully");
-//     return ESP_OK;
-// }
-
-// static esp_err_t zb_custom_resp_handler(const esp_zb_zcl_custom_cluster_command_message_t *message)
-// {
-//     ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
-//     ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
-//                         message->info.status);
-//     ESP_LOGI(TAG, "Received %s message: endpoint(%d), cluster(0x%x), data size(%d)", message->info.command.direction ? "response" : "request",
-//              message->info.dst_endpoint, message->info.cluster, message->data.size);
-
-//     printf("Receive(%d) response: ", message->data.size);
-//     for (int i = 0; i < message->data.size; i++) {
-//         printf("%02x, ", *((uint8_t *)message->data.value + i));
-//     }
-//     printf("\n");
-
-//     return ESP_OK;
-// }
-
-// static esp_err_t zb_read_attr_resp_handler(const esp_zb_zcl_cmd_read_attr_resp_message_t *message)
-// {
-//     ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
-//     ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
-//                         message->info.status);
-//     ESP_LOGI(TAG, "Received %s message: endpoint(%d), cluster(0x%x)", message->info.command.direction ? "response" : "request",
-//              message->info.dst_endpoint, message->info.cluster);
-
-//     esp_zb_zcl_read_attr_resp_variable_t *vars = message->variables;
-//     printf("size: %d\n", message->variables->attribute.data.size);
-//     while (vars) {
-//         for (int i = 0; i < vars->attribute.data.size; i++) {
-//             printf("%c ", *(uint8_t *)(vars->attribute.data.value + i));
-//         }
-//         printf("\n");
-//         vars = vars->next;
-//     }
-//     return ESP_OK;
-// }
-
-static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t *message)
-{
-    esp_err_t ret = ESP_OK;
-
-    ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
-    ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
-                        message->info.status);
-    ESP_LOGI(TAG, "Received message: endpoint(%d), cluster(0x%x), attribute(0x%x), data size(%d)", message->info.dst_endpoint, message->info.cluster,
-             message->attribute.id, message->attribute.data.size);
-    // if (message->info.dst_endpoint == HA_ONOFF_SWITCH_ENDPOINT) {
-        if (message->info.cluster == CUSTOM_CLUSTER_ID) {
-            for (int i = 0; i < message->attribute.data.size; i++) {
-                printf("%c ", *(uint8_t *)(message->attribute.data.value + i));
-            }
-            printf("\n");
-        }
-    // }
-    return ret;
-}
-
 static esp_err_t zb_custom_req_handler(const esp_zb_zcl_custom_cluster_command_message_t *message)
 {
     ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
     ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
                         message->info.status);
-
-    // esp_zb_zcl_custom_cluster_cmd_resp_t req = {
-    //     .zcl_basic_cmd.dst_addr_u.addr_short = message->info.src_address.u.short_addr,
-    //     .zcl_basic_cmd.src_endpoint = message->info.dst_endpoint,
-    //     .zcl_basic_cmd.dst_endpoint = message->info.src_endpoint,
-    //     .address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-    //     .profile_id = ESP_ZB_AF_HA_PROFILE_ID,
-    //     .cluster_id = CUSTOM_CLUSTER_ID,
-    //     .custom_cmd_id = message->info.command.id,
-    //     .direction = message->info.command.direction,
-    //     .data = {0, 0, 0},
-    // };
-
     printf("Receive(%d) request: ", message->data.size);
     for (int i = 0; i < message->data.size; i++) {
         printf("%c ", *((uint8_t *)message->data.value + i));
     }
     printf("\n");
-    // if (message->info.command.id == 0x01) {
-    //     esp_zb_zcl_set_attribute_val(HA_ESP_LIGHT_ENDPOINT, CUSTOM_CLUSTER_ID, ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE, 0x03, message->data.value, false);
-    //     req.data.type = ESP_ZB_ZCL_ATTR_TYPE_32BIT_ARRAY;
-    //     req.data.value = message->data.value;
-    //     esp_zb_zcl_custom_cluster_cmd_resp(&req);
-    // }
+
+    // vTaskDelay(50 / portTICK_PERIOD_MS);
+    // esp_zb_buttons_handler(button_func_pair);  
     return ESP_OK;
 }
 
@@ -335,20 +168,8 @@ static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id,
 {
     esp_err_t ret = ESP_OK;
     switch (callback_id) {
-    // case ESP_ZB_CORE_CMD_WRITE_ATTR_RESP_CB_ID:
-    //     zb_write_resp_handler((esp_zb_zcl_cmd_write_attr_resp_message_t *)message);
-    //     break;
-    // case ESP_ZB_CORE_CMD_READ_ATTR_RESP_CB_ID:
-    //     ret = zb_read_attr_resp_handler((esp_zb_zcl_cmd_read_attr_resp_message_t *)message);
-    //     break;
-    // case ESP_ZB_CORE_CMD_CUSTOM_CLUSTER_RESP_CB_ID:
-    //     ret = zb_custom_resp_handler((esp_zb_zcl_custom_cluster_command_message_t *)message);
-    //     break;
     case ESP_ZB_CORE_CMD_CUSTOM_CLUSTER_REQ_CB_ID:
         ret = zb_custom_req_handler((esp_zb_zcl_custom_cluster_command_message_t *)message);
-        break;
-    case ESP_ZB_CORE_SET_ATTR_VALUE_CB_ID:
-        ret = zb_attribute_handler((esp_zb_zcl_set_attr_value_message_t *)message);
         break;
     default:
         ESP_LOGW(TAG, "Receive Zigbee action(0x%x) callback", callback_id);
@@ -357,25 +178,32 @@ static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id,
     return ret;
 }
 
+signed int esp_zb_zcl_cluster_check_value_handler(uint16_t attr_id, uint8_t endpoint, uint8_t *value)
+{
+    printf("check value endpoint:%d, attr: %d\n", endpoint, attr_id);
+    return 0;
+}
+
+void esp_zb_zcl_cluster_write_attr_handler(uint8_t endpoint, uint16_t attr_id, uint8_t *new_value, uint16_t manuf_code)
+{
+    printf("write attr endpoint:%d, attr: %d\n", endpoint, attr_id);
+    return;
+}
+
+
 static void esp_zb_task(void *pvParameters)
 {
-    /* initialize Zigbee stack */
     esp_zb_cfg_t zb_nwk_cfg = ESP_ZB_ZC_CONFIG();
     esp_zb_init(&zb_nwk_cfg);
 
     esp_zb_ep_list_t *ep_list = esp_zb_ep_list_create();
     esp_zb_cluster_list_t *cluster_list = esp_zb_zcl_cluster_list_create();
 
-    esp_zb_on_off_cluster_cfg_t on_off_cfg;
-    on_off_cfg.on_off = ESP_ZB_ZCL_ON_OFF_ON_OFF_DEFAULT_VALUE;
-    esp_zb_attribute_list_t *esp_zb_on_off_cluster = esp_zb_on_off_cluster_create(&on_off_cfg);
-    esp_zb_cluster_list_add_on_off_cluster(cluster_list, esp_zb_on_off_cluster, ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);
-
     esp_zb_attribute_list_t *custom_attr = esp_zb_zcl_attr_list_create(CUSTOM_CLUSTER_ID);
     uint8_t custom_value = 0xf0;
     uint8_t custom_string[CUSTOM_STRING_MAX_SIZE] = "_hello_world";
     custom_string[0] = CUSTOM_STRING_MAX_SIZE - 1;
-    uint16_t custom_array[] = {1, 2, 3, 4, 5};
+    uint32_t custom_array[] = {1, 2, 3, 4, 5};
     esp_zb_custom_cluster_add_custom_attr(custom_attr, 0x01, ESP_ZB_ZCL_ATTR_TYPE_U64, ESP_ZB_ZCL_ATTR_ACCESS_READ_WRITE, &custom_value);
     esp_zb_custom_cluster_add_custom_attr(custom_attr, 0x02, ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING, ESP_ZB_ZCL_ATTR_ACCESS_READ_WRITE, custom_string);
     esp_zb_custom_cluster_add_custom_attr(custom_attr, 0x03, ESP_ZB_ZCL_ATTR_TYPE_32BIT_ARRAY, ESP_ZB_ZCL_ATTR_ACCESS_READ_WRITE, custom_array);
@@ -388,10 +216,16 @@ static void esp_zb_task(void *pvParameters)
         .app_device_version = 0,
     };
     esp_zb_ep_list_add_ep(ep_list, cluster_list, endpoint_config);
-
     esp_zb_device_register(ep_list);
-    esp_zb_set_primary_network_channel_set(ESP_ZB_PRIMARY_CHANNEL_MASK);
+
+    esp_zb_zcl_custom_cluster_handlers_t obj = {.cluster_id = CUSTOM_CLUSTER_ID,
+                                                .cluster_role = ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE,
+                                                .check_value_cb = esp_zb_zcl_cluster_check_value_handler,
+                                                .write_attr_cb = esp_zb_zcl_cluster_write_attr_handler};
+    esp_zb_zcl_custom_cluster_handlers_update(obj);
+
     esp_zb_core_action_handler_register(zb_action_handler);
+    esp_zb_set_primary_network_channel_set(ESP_ZB_PRIMARY_CHANNEL_MASK);
     ESP_ERROR_CHECK(esp_zb_start(false));
     esp_zb_main_loop_iteration();
 }

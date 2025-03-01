@@ -19,13 +19,12 @@
 static const char *TAG = "ESP_ZB_ON_OFF_LIGHT";
 
 #define CUSTOM_CLUSTER_ID 0xFC00
-#define CUSTOM_STRING_MAX_SIZE 127
+#define CUSTOM_STRING_MAX_SIZE 5
 
 static switch_func_pair_t button_func_pair[] = {
     {GPIO_INPUT_IO_TOGGLE_SWITCH, SWITCH_ONOFF_TOGGLE_CONTROL}
 };
 
-/********************* Define functions **************************/
 static void bdb_start_top_level_commissioning_cb(uint8_t mode_mask)
 {
     ESP_ERROR_CHECK(esp_zb_bdb_start_top_level_commissioning(mode_mask));
@@ -47,7 +46,6 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
             ESP_LOGI(TAG, "Start network steering");
             esp_zb_bdb_start_top_level_commissioning(ESP_ZB_BDB_MODE_NETWORK_STEERING);
         } else {
-            /* commissioning failed */
             ESP_LOGW(TAG, "Failed to initialize Zigbee stack (status: %s)", esp_err_to_name(err_status));
         }
         break;
@@ -73,63 +71,23 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
 
 static void esp_zb_buttons_handler(switch_func_pair_t *button_func_pair)
 {
-    if (button_func_pair->func == SWITCH_ONOFF_TOGGLE_CONTROL) {
-        uint8_t value[CUSTOM_STRING_MAX_SIZE];
-        value[0] = CUSTOM_STRING_MAX_SIZE - 1;
-        for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
-            value[i] = 'A';
-        }
-        esp_zb_zcl_custom_cluster_cmd_req_t custom_req;
-        custom_req.zcl_basic_cmd.src_endpoint = HA_ESP_LIGHT_ENDPOINT;
-        custom_req.zcl_basic_cmd.dst_endpoint = 1;
-        custom_req.zcl_basic_cmd.dst_addr_u.addr_short = 0x0000;
-        custom_req.address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT;
-        custom_req.cluster_id = CUSTOM_CLUSTER_ID;
-        custom_req.custom_cmd_id = 0x01;
-        custom_req.profile_id = ESP_ZB_AF_HA_PROFILE_ID;
-        custom_req.direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI;
-        custom_req.data.type = ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING;
-        custom_req.data.value = value;
-        esp_zb_zcl_custom_cluster_cmd_req(&custom_req);
-        ESP_EARLY_LOGI(TAG, "Send 'specified custom number' command");
-        // esp_zb_zcl_attribute_t attrs = {2, {ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING, sizeof(value), value}};
-        // esp_zb_zcl_write_attr_cmd_t cmd_req = {
-        //     .zcl_basic_cmd.src_endpoint = HA_ESP_LIGHT_ENDPOINT,
-        //     .address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT, // Change address mode
-        //     .zcl_basic_cmd.dst_addr_u.addr_short = 0x0000, // Coordinator's short address
-        //     .zcl_basic_cmd.dst_endpoint = 1, // Coordinator's endpoint
-        //     .clusterID = CUSTOM_CLUSTER_ID,
-        //     .attr_number = 1,
-        //     .attr_field = &attrs,
-        // };
-        // esp_err_t err = esp_zb_zcl_write_attr_cmd_req(&cmd_req);
-        // if (err != ESP_OK) {
-        //     ESP_LOGE(TAG, "Failed to send 'write large data' command: %s", esp_err_to_name(err));
-        // } else {
-        //     ESP_LOGI(TAG, "Send 'write large data(%d)' command", sizeof(value));
-        // }
+    uint8_t value[CUSTOM_STRING_MAX_SIZE];
+    value[0] = CUSTOM_STRING_MAX_SIZE - 1;
+    for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
+        value[i] = 'Z';
     }
-}
-
-
-static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t *message)
-{
-    esp_err_t ret = ESP_OK;
-
-    ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
-    ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
-                        message->info.status);
-    ESP_LOGI(TAG, "Received message: endpoint(%d), cluster(0x%x), attribute(0x%x), data size(%d)", message->info.dst_endpoint, message->info.cluster,
-             message->attribute.id, message->attribute.data.size);
-    // if (message->info.dst_endpoint == HA_ESP_LIGHT_ENDPOINT) {
-        if (message->info.cluster == CUSTOM_CLUSTER_ID) {
-            for (int i = 0; i < message->attribute.data.size; i++) {
-                printf("%c ", *(uint8_t *)(message->attribute.data.value + i));
-            }
-            printf("\n");
-        }
-    // }
-    return ret;
+    esp_zb_zcl_custom_cluster_cmd_req_t custom_req;
+    custom_req.zcl_basic_cmd.src_endpoint = HA_ESP_LIGHT_ENDPOINT;
+    custom_req.zcl_basic_cmd.dst_endpoint = 1;
+    custom_req.zcl_basic_cmd.dst_addr_u.addr_short = 0x0000;
+    custom_req.address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT;
+    custom_req.cluster_id = CUSTOM_CLUSTER_ID;
+    custom_req.custom_cmd_id = 0x01;
+    custom_req.profile_id = ESP_ZB_AF_HA_PROFILE_ID;
+    custom_req.direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI;
+    custom_req.data.type = ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING;
+    custom_req.data.value = value;
+    esp_zb_zcl_custom_cluster_cmd_req(&custom_req);
 }
 
 static esp_err_t zb_custom_req_handler(const esp_zb_zcl_custom_cluster_command_message_t *message)
@@ -137,40 +95,21 @@ static esp_err_t zb_custom_req_handler(const esp_zb_zcl_custom_cluster_command_m
     ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
     ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
                         message->info.status);
-
-    // esp_zb_zcl_custom_cluster_cmd_resp_t req = {
-    //     .zcl_basic_cmd.dst_addr_u.addr_short = message->info.src_address.u.short_addr,
-    //     .zcl_basic_cmd.src_endpoint = message->info.dst_endpoint,
-    //     .zcl_basic_cmd.dst_endpoint = message->info.src_endpoint,
-    //     .address_mode = ESP_ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-    //     .profile_id = ESP_ZB_AF_HA_PROFILE_ID,
-    //     .cluster_id = CUSTOM_CLUSTER_ID,
-    //     .custom_cmd_id = message->info.command.id,
-    //     .direction = message->info.command.direction,
-    //     .data = {0, 0, 0},
-    // };
-
     printf("Receive(%d) request: ", message->data.size);
     for (int i = 0; i < message->data.size; i++) {
-        printf("%02x, ", *((uint8_t *)message->data.value + i));
+        printf("%c, ", *((uint8_t *)message->data.value + i));
     }
     printf("\n");
-    // if (message->info.command.id == 0x01) {
-    //     esp_zb_zcl_set_attribute_val(HA_ESP_LIGHT_ENDPOINT, CUSTOM_CLUSTER_ID, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, 0x03, message->data.value, false);
-    //     req.data.type = ESP_ZB_ZCL_ATTR_TYPE_32BIT_ARRAY;
-    //     req.data.value = message->data.value;
-    //     esp_zb_zcl_custom_cluster_cmd_resp(&req);
-    // }
+
+    // vTaskDelay(50 / portTICK_PERIOD_MS);
+    // esp_zb_buttons_handler(button_func_pair);
     return ESP_OK;
 }
 
 static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id, const void *message)
-{
+{   
     esp_err_t ret = ESP_OK;
     switch (callback_id) {
-    case ESP_ZB_CORE_SET_ATTR_VALUE_CB_ID:
-        ret = zb_attribute_handler((esp_zb_zcl_set_attr_value_message_t *)message);
-        break;
     case ESP_ZB_CORE_CMD_CUSTOM_CLUSTER_REQ_CB_ID:
         ret = zb_custom_req_handler((esp_zb_zcl_custom_cluster_command_message_t *)message);
         break;
@@ -195,17 +134,11 @@ void esp_zb_zcl_cluster_write_attr_handler(uint8_t endpoint, uint16_t attr_id, u
 
 static void esp_zb_task(void *pvParameters)
 {
-    /* initialize Zigbee stack */
     esp_zb_cfg_t zb_nwk_cfg = ESP_ZB_ZED_CONFIG();
     esp_zb_init(&zb_nwk_cfg);
 
     esp_zb_ep_list_t *ep_list = esp_zb_ep_list_create();
     esp_zb_cluster_list_t *cluster_list = esp_zb_zcl_cluster_list_create();
-
-    esp_zb_on_off_cluster_cfg_t on_off_cfg;
-    on_off_cfg.on_off = ESP_ZB_ZCL_ON_OFF_ON_OFF_DEFAULT_VALUE;
-    esp_zb_attribute_list_t *esp_zb_on_off_cluster = esp_zb_on_off_cluster_create(&on_off_cfg);
-    esp_zb_cluster_list_add_on_off_cluster(cluster_list, esp_zb_on_off_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE);
 
     esp_zb_attribute_list_t *custom_attr = esp_zb_zcl_attr_list_create(CUSTOM_CLUSTER_ID);
     uint8_t custom_value = 0xf0;
