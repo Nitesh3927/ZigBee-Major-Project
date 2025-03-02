@@ -12,6 +12,8 @@
 #include "zcl/esp_zigbee_zcl_command.h"
 #include "zcl/esp_zigbee_zcl_common.h"
 
+#include "esp_ieee802154.h"
+
 #if !defined ZB_ED_ROLE
 #error Define ZB_ED_ROLE in idf.py menuconfig to compile light (End Device) source code.
 #endif
@@ -97,9 +99,9 @@ static esp_err_t zb_custom_req_handler(const esp_zb_zcl_custom_cluster_command_m
                         message->info.status);
     printf("Receive(%d) request: ", message->data.size);
     for (int i = 0; i < message->data.size; i++) {
-        printf("%c, ", *((uint8_t *)message->data.value + i));
+        printf("%c", *((uint8_t *)message->data.value + i));
     }
-    printf("\n");
+    printf(" RSSI: %hhd\n", esp_ieee802154_get_recent_rssi());
 
     // vTaskDelay(50 / portTICK_PERIOD_MS);
     // esp_zb_buttons_handler(button_func_pair);
