@@ -13,6 +13,9 @@
 #include "ha/esp_zigbee_ha_standard.h"
 #include "zcl/esp_zigbee_zcl_common.h"
 
+#include "driver/i2c.h"
+#include "driver/i2c_master.h"
+
 #if defined ZB_ED_ROLE
 #error Define ZB_COORDINATOR_ROLE in idf.py menuconfig to compile light switch source code.
 #endif
@@ -20,7 +23,7 @@
 static const char *TAG = "ESP_ZB_ON_OFF_SWITCH";
 
 #define CUSTOM_CLUSTER_ID 0xFC00
-#define CUSTOM_STRING_MAX_SIZE 5
+#define CUSTOM_STRING_MAX_SIZE 30
 
 static switch_func_pair_t button_func_pair[] = {
     {GPIO_INPUT_IO_TOGGLE_SWITCH, SWITCH_ONOFF_TOGGLE_CONTROL}
@@ -35,10 +38,10 @@ typedef struct light_bulb_device_params_s {
 static void esp_zb_buttons_handler(switch_func_pair_t *button_func_pair)
 {
     uint8_t value[CUSTOM_STRING_MAX_SIZE];
-    value[0] = CUSTOM_STRING_MAX_SIZE - 1;
-    for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
-        value[i] = 'A';
-    }
+    // value[0] = CUSTOM_STRING_MAX_SIZE - 1;
+    // for (int i = 1; i < CUSTOM_STRING_MAX_SIZE; i++) {
+    //     value[i] = 'A';
+    // }
     esp_zb_zcl_custom_cluster_cmd_req_t custom_req;
     custom_req.zcl_basic_cmd.src_endpoint = HA_ONOFF_SWITCH_ENDPOINT;
     custom_req.zcl_basic_cmd.dst_endpoint = 10;
@@ -49,11 +52,16 @@ static void esp_zb_buttons_handler(switch_func_pair_t *button_func_pair)
     custom_req.profile_id = ESP_ZB_AF_HA_PROFILE_ID;
     custom_req.direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_SRV;
     custom_req.data.type = ESP_ZB_ZCL_ATTR_TYPE_CHAR_STRING;
-    custom_req.data.value = value;
-    for (int i = 0; i < 1000; i++) {
+    // while (true) {
+        i2c_slave_read_buffer(I2C_NUM_0, value, sizeof(value), 10 / portTICK_PERIOD_MS);
+        custom_req.data.value = value;
+        for (int i = 0; i < CUSTOM_STRING_MAX_SIZE; i++) {
+            printf("%c", value[i]);
+        }
         esp_zb_zcl_custom_cluster_cmd_req(&custom_req);
-        vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
+        // vTaskDelay(100 / portTICK_PERIOD_MS);
+        printf("\n");
+    // }
 }
 
 static void bdb_start_top_level_commissioning_cb(uint8_t mode_mask)
@@ -159,8 +167,8 @@ static esp_err_t zb_custom_req_handler(const esp_zb_zcl_custom_cluster_command_m
     }
     printf("\n");
 
-    // vTaskDelay(50 / portTICK_PERIOD_MS);
-    // esp_zb_buttons_handler(button_func_pair);  
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    esp_zb_buttons_handler(button_func_pair);  
     return ESP_OK;
 }
 
@@ -232,6 +240,20 @@ static void esp_zb_task(void *pvParameters)
 
 void app_main(void)
 {
+    i2c_config_t conf = {
+        .mode = I2C_MODE_SLAVE,
+        .sda_io_num = 5,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_io_num = 4,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .slave.slave_addr = 0x3C,
+        .slave.maximum_speed = 400000,
+        .clk_flags = 0,
+    };
+    i2c_param_config(I2C_NUM_0, &conf);
+    i2c_driver_install(I2C_NUM_0, conf.mode, 127, 127, 0);
+
+
     esp_zb_platform_config_t config = {
         .radio_config = ESP_ZB_DEFAULT_RADIO_CONFIG(),
         .host_config = ESP_ZB_DEFAULT_HOST_CONFIG(),
