@@ -1,3 +1,4 @@
+# for ESP IDF stuff
 
 .devcontainer
 build
@@ -10,7 +11,6 @@ sdkconfig.defaults.esp32c5
 sdkconfig.defaults.esp32c6
 sdkconfig.defaults.esp32s2
 sdkconfig.defaults.esp32s3
-/ControlLogicExploration
 IDF_framwork/HA_on_off_light/.vscode/settings.json
 IDF_framwork/HA_on_off_light/sdkconfig
 IDF_framwork/HA_on_off_light/sdkconfig.defaults
@@ -19,5 +19,17 @@ IDF_framwork/HA_on_off_switch/.vscode/settings.json
 IDF_framwork/HA_on_off_switch/sdkconfig
 IDF_framwork/HA_on_off_switch/sdkconfig.defaults
 IDF_framwork/HA_on_off_switch/sdkconfig.old
+
+# for matlab stuff
+*_ert_rtw/
+*slprj/
+*.bin
+*.elf
+*.map
+*.slxc
+*.r2018a
+
+# for misleousness
 *.json
 *.md
+.venv

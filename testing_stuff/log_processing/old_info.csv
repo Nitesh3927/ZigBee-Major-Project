@@ -1,0 +1,17 @@
+Graph Name,Start Time,Stop Time
+Accleration_1,195,205
+Accleration_2,410,420
+Accleration_3,927,940
+Constant_speed_1_at_rest,1011,1028
+Constant_speed_2_at_rest,205,245
+Sudden_breaking_1_slight,88,110
+Sudden_breaking_2,240,265
+Sudden_breaking_3,505,523
+Sudden_breaking_4,880,890
+City_driving_1,20,110
+City_driving_2,940,980
+Flow,910,1020
+Reverse_1,1432,1441
+Reverse_2,1460,1470
+Bumpy_road,174,195
+Extreme_left,1354,1365

@@ -1,0 +1,62 @@
+
+6  ->  Initiate
+50 ->  Lane Change
+104 ->  Braking (Slight)
+178 ->  Sliproad (left)
+195 ->  Acc
+205 ->  Constant
+248 ->  Sudden Braking
+290-310 -> Roundabout
+320 ->  Roundabout (Right)
+410 ->  Accelerating
+518 ->  Sudden Braking
+565 ->  Roundabout (Right)
+588 ->  Brake
+828 ->  Brake
+883 -> Sudden Braking (20 kmph Braking)
+
+946 -> Acceleration
+950 -> Roundbout
+965 -> Slight Left
+981 -> Slight Right
+1005 -> Slight Braking
+1020 -> Zero (at rest)
+1068 -> Acceleration
+1090 -> Roundbout
+1103 -> Brake
+1188 -> Acceleration
+1275 -> Acceleration
+1294 -> Left
+1332 -> Acceleration
+1355 -> Extreme Left
+1388 -> U turn
+1410 -> U turn
+1440 -> Reverse
+
+
+30.630968,76.730909
+
+
+30.629737,76.729433
+30.630480,76.730132
+
+Graph Name,Start Time,Stop Time
+Accleration_1,195,205
+Accleration_2,410,420
+Accleration_3,927,940
+Constant_speed_1_at_rest,1011,1028
+Constant_speed_2_at_rest,205,245
+Sudden_breaking_1_slight,88,110
+Sudden_breaking_2,240,265
+Sudden_breaking_3,505,523
+Sudden_breaking_4,880,890
+City_driving_1,20,110
+City_driving_2,940,980
+Flow,910,1020
+Reverse_1,1432,1441
+Reverse_2,1460,1470
+Bumpy_road,174,195
+Extreme_left,1354,1365
+Lane_change_left_2		
+Lane_change_right_1		
+Lane_change_right_2		

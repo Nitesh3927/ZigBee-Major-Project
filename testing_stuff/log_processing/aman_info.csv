@@ -1,0 +1,13 @@
+Graph Name,Start Time,Stop Time
+Slight DownHill,35,50
+Slight UpHill,110,128
+Slight DownHill,134,146
+Steep DownHill,245,255
+Emergency Break,354,363
+Uturn,420,435
+Slight UpHill,570,580
+Slight UpHill,655,665
+Manual Gear Shift,923,936
+Constant speed of 80Kmph,1180,1210
+Constant speed of 60Kmph,1070,1090
+Jerky Patch,1233,1257
