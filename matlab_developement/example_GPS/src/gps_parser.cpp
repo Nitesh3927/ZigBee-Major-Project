@@ -58,8 +58,8 @@ void parseData(uint8_T *rawStream
     
     *statusOut = 0;
     
-    isGPGGA = strncmp(rawStream, "GPGGA", 5);                            // Is sentence GPGGA?
-    isGPRMC = strncmp(rawStream, "GPRMC", 5);                            // Is sentence GPRMC?
+    isGPGGA = strncmp((const char*)rawStream, "GPGGA", 5);  // Is sentence GPGGA?
+    isGPRMC = strncmp((const char*)rawStream, "GPRMC", 5);  // Is sentence GPRMC?
     
     int state = -1;                                                      // State variable
     
@@ -76,14 +76,14 @@ void parseData(uint8_T *rawStream
     if (!isGPGGA | !isGPRMC) {
         
         lastCommaPtr = rawStream;                                        // Store the pointer to the last comma
-        while(lastCommaPtr != NULL){                                     // Continue until the end of the sentence
-            commaPtr = strchr(lastCommaPtr + 1, separator);              // Pointer to the present comma (+1 to avoid the present comma being accounted for)
-            nextCommaPtr = strchr(commaPtr + 1, separator);              // Pointer to the next comma
-            lengthField = (nextCommaPtr - 1)- (commaPtr + 1) + 1;        // Length of the temporaty placeholder buffer
+        while (lastCommaPtr != NULL) {  // Continue until the end of the sentence
+            commaPtr = (uint8_T*)strchr((const char*)(lastCommaPtr + 1), separator);  // Pointer to the present comma
+            nextCommaPtr = (uint8_T*)strchr((const char*)(commaPtr + 1), separator);  // Pointer to the next comma
+            lengthField = (nextCommaPtr - 1) - (commaPtr + 1) + 1;  // Length of the temporary placeholder buffer
             
-            placeholder = (uint8_T*)calloc(lengthField, sizeof(uint8_T));// Allocate memory to the temporary buffer
+            placeholder = (uint8_T*)calloc(lengthField, sizeof(uint8_T));  // Allocate memory to the temporary buffer
                 
-            if(lengthField > 0 & NULL == placeholder){                   // Check if memory is allocated to the buffer
+            if(lengthField > 0 && placeholder == NULL){                   // Check if memory is allocated to the buffer
                                                                          // The placeholder can be NULL if there are no characters between two commas
                 
                 *statusOut = -4;
@@ -98,63 +98,70 @@ void parseData(uint8_T *rawStream
             switch(state){
                 case 1:
                     //-------------------GPGGA state-----------------------
-                    switch(commaCount){                                  // Assign the output elements depending on the number of commas read
+                    switch (commaCount) {
                         case 0:
-                            *time = (uint32_T)strtol(placeholder, NULL, 10); // TIME
+                            *time = (uint32_T)strtol((const char*)placeholder, NULL, 10);  // TIME
                             break;
-                            
+
                         case 1:
-                            *latitude = atof(placeholder);                   // LATITUDE
+                            *latitude = strtod((const char*)placeholder, NULL);  // LATITUDE
                             lastCommaPtr = commaPtr;
-                            commaPtr = strchr(lastCommaPtr + 1, separator);  // Account for the direction of Latitude
-                            // If 'S' then the value is negative
-                            // If 'N' then positive
+                            commaPtr = (uint8_T*)strchr((const char*)(lastCommaPtr + 1), separator);  // Account for the direction of Latitude
                             commaCount++;
-                            if (*(commaPtr + 1) == 83 ){                     // If the character is an 'S'
-                                (*latitude) = (*latitude)*(-1);              // Multiply by -1
+                            if (*(commaPtr + 1) == 'S') {  // If the character is 'S'
+                                (*latitude) = (*latitude) * (-1);  // Multiply by -1
                             }
                             break;
-                            
+
                         case 3:
-                            *longitude = atof(placeholder);                  // LONGITUDE
+                            *longitude = strtod((const char*)placeholder, NULL);  // LONGITUDE
                             lastCommaPtr = commaPtr;
-                            commaPtr = strchr(lastCommaPtr + 1, separator);  // Account for the direction of the longitude
-                            // If 'W' the value is negative
-                            // If 'E' the value is positive
+                            commaPtr = (uint8_T*)strchr((const char*)(lastCommaPtr + 1), separator);  // Account for the direction of Longitude
                             commaCount++;
-                            if (*(commaPtr + 1) == 87 ){                     // If the character is 'W'
-                                (*longitude) = (*longitude)*(-1);            // Multiply by -1
+                            if (*(commaPtr + 1) == 'W') {  // If the character is 'W'
+                                (*longitude) = (*longitude) * (-1);  // Multiply by -1
                             }
                             break;
-                            
+
                         case 5:
-                            
-                            if (*(commaPtr + 1) == '1'){
+                            if (*(commaPtr + 1) == '1') {
                                 *statusOut = 1;
-                            }
-                            else{
+                            } else {
                                 *time = 0;
                                 *latitude = 0;
                                 *longitude = 0;
                             }
                             break;
-                            
+
                         case 6:
-                            *noSat = (uint8_T)strtoul(placeholder, NULL, 10);// NUMBER OF SATELLITES
+                            *noSat = (uint8_T)strtoul((const char*)placeholder, NULL, 10);  // NUMBER OF SATELLITES
                             break;
-                            
+
                         case 7:
-                            *hdop = strtod(placeholder, NULL);               // HORIZONTAL DILUTION OF POSITION
+                            *hdop = strtod((const char*)placeholder, NULL);  // HORIZONTAL DILUTION OF POSITION
                             break;
-                            
+
                         case 8:
-                            *alti = strtod(placeholder, NULL);               // ALTITUDE
+                            *alti = strtod((const char*)placeholder, NULL);  // ALTITUDE
                             break;
-                            
+
+                        case 9:
+                            *msl = strtod((const char*)placeholder, NULL);  // MEAN SEA LEVEL
+                            break;
+
                         case 10:
-                            *msl = strtod(placeholder, NULL);                // MEAN SEA LEVEL
+                            *speed = strtod((const char*)placeholder, NULL);  // SPEED
                             break;
-                            
+
+                        case 11:
+                            *tckAngle = strtod((const char*)placeholder, NULL);  // TRACK ANGLE
+                            *date = (uint32_T)strtol((const char*)placeholder, NULL, 10);  // DATE
+                            break;
+
+                        case 12:
+                            *date = (uint32_T)strtol((const char*)placeholder, NULL, 10);  // DATE
+                            break;
+
                         default:
                             break;
                     }
@@ -164,7 +171,7 @@ void parseData(uint8_T *rawStream
                     //------------------GPRMC state------------------------
                     switch(commaCount){                                      // Assign the output elements depending on the number of commas read
                         case 0:                                              // TIME
-                            *time = (uint32_T)strtol(placeholder, NULL, 10);
+                            *time = (uint32_T)strtol((const char*)placeholder, NULL, 10);
                             break;
                             
                         case 1:
@@ -174,9 +181,9 @@ void parseData(uint8_T *rawStream
                             break;
                             
                         case 2:
-                            *latitude = atof(placeholder);                   // LATITUDE
+                            *latitude = atof((const char*)placeholder);                   // LATITUDE
                             lastCommaPtr = commaPtr;
-                            commaPtr = strchr(lastCommaPtr + 1, separator);    // Account for the direction of Latitude
+                            commaPtr = (uint8_T*)strchr((const char*)(lastCommaPtr + 1), separator);    // Account for the direction of Latitude
                             
                             // If 'S' then the value is negative
                             // If 'N' then positive
@@ -187,9 +194,9 @@ void parseData(uint8_T *rawStream
                             break;
                             
                         case 4:
-                            *longitude = atof(placeholder);                  // LONGITUDE
+                            *longitude = atof((const char*)placeholder);                  // LONGITUDE
                             lastCommaPtr = commaPtr;
-                            commaPtr = strchr(lastCommaPtr + 1, separator);  // Account for the direction of Longitude
+                            commaPtr = (uint8_T*)strchr((const char*)(lastCommaPtr + 1), separator);  // Account for the direction of Longitude
                             // If 'W' then the value is negative
                             // If 'E' then positive
                             commaCount++;
@@ -199,15 +206,17 @@ void parseData(uint8_T *rawStream
                             break;
                             
                         case 6:
-                            *speed = strtod(placeholder, NULL);              // SPEED
+                            *speed = strtod((const char*)placeholder, NULL);  // SPEED
+                            *tckAngle = strtod((const char*)placeholder, NULL);  // TRACK ANGLE
+                            *date = (uint32_T)strtol((const char*)placeholder, NULL, 10);  // DATE
                             break;
                             
                         case 7:
-                            *tckAngle = strtod(placeholder, NULL);           // TRACK ANGLE
+                            *tckAngle = strtod((const char*)placeholder, NULL);  // TRACK ANGLE
                             break;
                             
                         case 8:
-                            *date = (uint32_T)strtol(placeholder, NULL, 10);  // DATE
+                            *date = (uint32_T)strtol((const char*)placeholder, NULL, 10);  // DATE
                             break;
                             
                         default:
@@ -233,7 +242,7 @@ uint8_T fetchChecksum(uint8_T *pointToCheckChar, uint8_T endChar, int8_T *status
     uint8_T checksum = 0;                                                // Value to be returned
     uint8_T checksumLength = 0;                                          // Length between checkChar and endChar
     
-    pointToEndChar = strchr(pointToCheckChar, endChar);
+    pointToEndChar = (uint8_T*)strchr((const char*)pointToCheckChar, endChar);
     
     checksumLength = (pointToEndChar - 1) - (pointToCheckChar + 1) + 1;  /* The checksum string starts one after the Check Character and ends
      * one character before the End Character.
@@ -255,7 +264,7 @@ uint8_T fetchChecksum(uint8_T *pointToCheckChar, uint8_T endChar, int8_T *status
     }
     
     checksumString[checksumLength] = '\0';                               // Append NULL charcater at the end of the array
-    checksum = (uint8_T)strtoul(checksumString, NULL, 16);               // Convert the received ASCII checksum HEX value to a uint8
+    checksum = (uint8_T)strtoul((const char*)checksumString, NULL, 16);  // Convert the received ASCII checksum HEX value to a uint8
     
     free(checksumString);                                                // Free the allocated memory
     checksumString = NULL;
@@ -344,10 +353,10 @@ extern "C" void readData(uint8_T *inData
                 // Append to the Data Buffer
                 dataBuffer[index] = presentChar;
                 // Pointer to the check character
-                pointToCheckChar = strchr(dataBuffer, checkChar);
+                pointToCheckChar = (uint8_T*)strchr((const char*)dataBuffer, checkChar);
                 
-                // Fetch the checksum value received from the sentence
-                checksum = fetchChecksum(pointToCheckChar, endChar, *status);
+                // Fetch the checksum value
+                checksum = fetchChecksum(pointToCheckChar, endChar, status);
                 
                 // If calculated parity and checksum matches
                 if (parity == checksum){
@@ -357,8 +366,7 @@ extern "C" void readData(uint8_T *inData
                     
                     /* Copy the characters between startChar and checkChar
                      * to the output */
-                    strncpy(retString, dataBuffer,
-                            (pointToCheckChar - dataBuffer));
+                    strncpy((char*)retString, (const char*)dataBuffer, (pointToCheckChar - dataBuffer));
                     retString[(pointToCheckChar - dataBuffer) +1] = '\0';
                     
                     *status = 1;

@@ -1,0 +1,96 @@
+uint8_t setRate_1Hz[] = { 
+  0xB5, 0x62,  // UBX Header
+  0x06, 0x08,  // CFG-RATE
+  0x06, 0x00,  // Payload Length
+  0xE8, 0x03,  // Measurement Rate = 1000 ms
+  0x01, 0x00,  // Navigation Rate = 1
+  0x00, 0x00,  // Time Reference = UTC
+  0x01, 0x39   // Checksum (CK_A, CK_B)
+};
+
+
+uint8_t setRate_2Hz[] = { 
+  0xB5, 0x62,
+  0x06, 0x08,
+  0x06, 0x00,
+  0xF4, 0x01,  // Measurement Rate = 500 ms
+  0x01, 0x00,
+  0x00, 0x00,
+  0x0E, 0x79   // Checksum
+};
+
+uint8_t setRate_3Hz[] = { 
+  0xB5, 0x62,
+  0x06, 0x08,
+  0x06, 0x00,
+  0x4D, 0x01,  // Measurement Rate = 333 ms
+  0x01, 0x00,
+  0x00, 0x00,
+  0x5F, 0x52   // Checksum
+};
+
+uint8_t setRate_4Hz[] = { 
+  0xB5, 0x62,
+  0x06, 0x08,
+  0x06, 0x00,
+  0xFA, 0x00,  // Measurement Rate = 250 ms
+  0x01, 0x00,
+  0x00, 0x00,
+  0x1F, 0x6A   // Checksum
+};
+
+uint8_t setRate_5Hz[] = { 
+  0xB5, 0x62,
+  0x06, 0x08,
+  0x06, 0x00,
+  0xC8, 0x00,  // Measurement Rate = 200 ms
+  0x01, 0x00,
+  0x00, 0x00,
+  0xDE, 0x6A   // Checksum
+};
+
+uint8_t setRate_1Hz[] = { 
+  181,  98,  // UBX Header
+  6,    8,   // CFG-RATE
+  6,    0,   // Payload Length
+  232,  3,   // Measurement Rate = 1000 ms
+  1,    0,   // Navigation Rate = 1
+  0,    0,   // Time Reference = UTC
+  1,    57   // Checksum (CK_A, CK_B)
+};
+uint8_t setRate_2Hz[] = { 
+  181,  98,
+  6,    8,
+  6,    0,
+  244,  1,   // Measurement Rate = 500 ms
+  1,    0,
+  0,    0,
+  14,   121  // Checksum
+};
+uint8_t setRate_3Hz[] = { 
+  181,  98,
+  6,    8,
+  6,    0,
+  77,   1,   // Measurement Rate = 333 ms
+  1,    0,
+  0,    0,
+  95,   82   // Checksum
+};
+uint8_t setRate_4Hz[] = { 
+  181,  98,
+  6,    8,
+  6,    0,
+  250,  0,   // Measurement Rate = 250 ms
+  1,    0,
+  0,    0,
+  31,   106  // Checksum
+};
+uint8_t setRate_5Hz[] = { 
+  181,  98,
+  6,    8,
+  6,    0,
+  200,  0,   // Measurement Rate = 200 ms
+  1,    0,
+  0,    0,
+  222,  106  // Checksum
+};

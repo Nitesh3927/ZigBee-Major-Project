@@ -80,7 +80,7 @@ classdef GPSParser < matlab.System & coder.ExternalDependency
     %======================================================================
     methods (Access=protected)
         %------------------------------------------------------------------
-        function setupImpl(obj) %#ok<MANU>
+        function setupImpl(obj) 
             if isempty(coder.target)
                 % Place simulation setup code here
             else
@@ -372,7 +372,7 @@ classdef GPSParser < matlab.System & coder.ExternalDependency
         end
         %------------------------------------------------------------------
         function updateBuildInfo(buildInfo, context)
-            if context.isCodeGenTarget('rtw')
+            if context.isCodeGenTarget('mex')
                 % Update buildInfo
                 srcDir = fullfile(fileparts(mfilename('fullpath')),'src');
                 includeDir = fullfile(fileparts(mfilename('fullpath')),'include');
