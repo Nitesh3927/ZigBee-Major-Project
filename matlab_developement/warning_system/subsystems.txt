@@ -1,0 +1,110 @@
+accleration_reader
+
+    PARAMETERS -->
+    ACCEL_RANGE uint8 [1,1] Non tunable
+    ENABLE_GYRO logical [1,1] Non tunable
+    DLPF_SETTING uint8 [1,1] Non tunable
+
+    INPUTS --> None
+
+    OUTPUTS -->
+    acc_x double [1,1]
+    acc_y double [1,1]
+    acc_z double [1,1]
+
+GPS_reader
+
+    OUTPUTS --> 
+    hdop double [1,1]
+    hdop_isValid logical [1,1]
+    
+    satellite uint8 [1,1]
+    satellite_isValid logical [1,1]
+    
+    time_hours uint8 [1,1]
+    time_mins uint8 [1,1]
+    time_sec uint8 [1,1]
+    time_isValid logical [1,1]
+    
+    date_day uint8 [1,1]
+    date_month uint8 [1,1]
+    date_year uint16 [1,1]
+    date_isValid logical [1,1]
+    
+    speed double [1,1]
+    speed_isValid logical [1,1]
+    
+    lat double [1,1]
+    lat_isValid logical [1,1]
+    
+    lng double [1,1]
+    lng_isValid logical [1,1]
+
+master_writer
+
+    PARAMETERS -->
+    transmitter_address uint32 [1,1] Non tunable
+    bus_frequency uint64 [1,1] Non tunable
+
+    INPUTS --> 
+    
+    TRANSMITTING logical [1,1]
+    
+    local_lat double [1,1]
+    local_lat_isValid logical [1,1]
+    
+    local_lng double [1,1]
+    local_lng_isValid logical [1,1]
+    
+    local_speed double [1,1]
+    local_speed_isValid logical [1,1]
+
+    OUTPUTS --> 
+    (can design enums) message_delivered bool or int
+    (can design enums) slave_status bool or int 
+
+master_reader
+
+    PARAMETERS --> 
+    transmitter_address uint32 [1,1] Non tunable
+    bus_frequency uint64 [1,1] Non tunabl
+
+    INPUTS --> None
+
+    OUTPUTS -->
+    RECIVING
+    foreign_lat
+    foreign_lng
+    foreign_speed
+    foreign_zigbee_address
+    foreign_status
+
+
+struct DataPacket {
+  uint32_t zigbeeAddress; // 4 bytes (aligned to 4)
+  float latitude;         // 4 bytes
+  float longitude;        // 4 bytes
+  float speed;            // 4 bytes
+  uint8_t status;         // 1 byte
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    PARAMETERS -->
+    OUTPUTS -->
+    INPUTS -->
+    PARAMETERS -->
+    OUTPUTS -->
+    INPUTS -->
