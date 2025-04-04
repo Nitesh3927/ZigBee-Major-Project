@@ -28,6 +28,13 @@
 #define GPS_RX_PIN 16
 #define GPS_TX_PIN 17
 
+// Configuration flags
+bool showDateTime = true;
+bool showLocation = true;
+bool showSpeed = true;
+bool showHDOP = true;
+bool showSatellites = true;
+
 TinyGPSPlus gps;
 SoftwareSerial gpsSerial(GPS_RX_PIN, GPS_TX_PIN);
 
@@ -35,18 +42,53 @@ void setup() {
   Serial.begin(115200);
   gpsSerial.begin(GPS_BAUD);
   Serial.println("Waiting for GPS signal...");
+
+  Serial.println("Sending factory reset command to GPS...");
+  resetToFactorySettings();
+  Serial.println("Factory reset command sent. Restart the GPS module to apply changes.");
 }
 
 void loop() {
   while (gpsSerial.available() > 0) {
-    gps.encode(gpsSerial.read());
+    char c = gpsSerial.read();
+    // Serial.print(c); // Print raw NMEA sentence
+    gps.encode(c);   // Parse the data
   }
-
+  
   displayInfo();
   delay(300);
 }
 
+// Function to reset GPS to factory settings
+void resetToFactorySettings() {
+  // UBX-CFG-CFG command to reset to factory settings
+  uint8_t factoryResetCommand[] = {
+      0xB5, 0x62, // UBX header
+      0x06, 0x09, // CFG-CFG class and ID
+      0x0D, 0x00, // Payload length (13 bytes)
+      0xFF, 0xFF, 0x00, 0x00, // Clear mask (reset all configurations)
+      0xFF, 0xFF, 0x00, 0x00, // Save mask (not saving anything)
+      0xFF, 0xFF, 0x00, 0x00, // Load mask (load factory defaults)
+      0x01,                   // Device mask (apply to GPS module)
+      0x1D, 0xAB              // Checksum (calculated for the payload)
+  };
+
+  // Send the command to the GPS module
+  for (uint8_t i = 0; i < sizeof(factoryResetCommand); i++) {
+    gpsSerial.write(factoryResetCommand[i]);
+  }
+}
+
 void displayInfo() {
+  if (showDateTime) displayDateTime();
+  if (showLocation) displayLocation();
+  if (showSpeed) displaySpeed();
+  if (showHDOP) displayHDOP();
+  if (showSatellites) displaySatellites();
+  Serial.println();
+}
+
+void displayDateTime() {
   Serial.print(F("Date/Time: "));
   if (gps.date.isValid() && gps.time.isValid()) {
     Serial.print(gps.date.month());
@@ -69,8 +111,11 @@ void displayInfo() {
   } else {
     Serial.print(F("INVALID"));
   }
+  Serial.print(F("  "));
+}
 
-  Serial.print(F("  Location: "));
+void displayLocation() {
+  Serial.print(F("Location: "));
   if (gps.location.isValid()) {
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(","));
@@ -78,30 +123,69 @@ void displayInfo() {
   } else {
     Serial.print(F("INVALID"));
   }
+  Serial.print(F("  "));
+}
 
-  Serial.print(F("  Speed: "));
+void displaySpeed() {
+  Serial.print(F("Speed: "));
   if (gps.speed.isValid()) {
     Serial.print(gps.speed.kmph());
     Serial.print(F(" km/h"));
   } else {
     Serial.print(F("INVALID"));
   }
+  Serial.print(F("  "));
+}
 
-  Serial.print(F("  HDOP: "));
+void displayHDOP() {
+  Serial.print(F("HDOP: "));
   Serial.print(gps.hdop.value() / 100.0);
   if (gps.hdop.isValid()) {
     Serial.print(F(" (V)"));
   } else {
     Serial.print(F(" (NV)"));
   }
+  Serial.print(F("  "));
+}
 
-  Serial.print(F("  Satellites: "));
+void displaySatellites() {
+  Serial.print(F("Satellites: "));
   Serial.print(gps.satellites.value());
   if (gps.satellites.isValid()) {
     Serial.print(F(" (V)"));
   } else {
     Serial.print(F(" (NV)"));
   }
-
-  Serial.println();
+  Serial.print(F("  "));
 }
+
+// void gpsStuff() {
+  
+//   gps.altitude.feet()
+//   gps.altitude.kilometers()
+//   gps.altitude.meters()
+//   gps.altitude.miles()
+//   gps.altitude.value()
+
+//   gps.course.deg()
+//   gps.course.value()
+
+//   gps.date.day()
+//   gps.date.month()
+//   gps.date.year()
+  
+//   gps.time.hour()
+//   gps.time.minute()
+//   gps.time.second()
+//   gps.time.centisecond()
+
+//   gps.hdop.value()
+  
+//   gps.satellites.value()
+
+//   gps.speed.kmph()
+
+//   gps.location.lat()
+//   gps.location.lng()
+
+// }

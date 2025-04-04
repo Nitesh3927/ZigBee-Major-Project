@@ -4,46 +4,61 @@
   ESP32 I2C Slave example: https://github.com/espressif/arduino-esp32/blob/master/libraries/Wire/examples/WireSlave/WireSlave.ino
 *********/
 
-#include "Wire.h"
+#include <Wire.h>
 
-#define I2C_ADDR_32_H2 0x3C
+#define SLAVE_ADDRESS 0x3F
+#define I2C_FREQ 400000
+// #define I2C_FREQ 0
+#define SCL_PIN 4
+#define SDA_PIN 5
 
-uint32_t i = 0;
+volatile int receivedData = 0; // Variable to store received data
+volatile bool dataAvailable = false; // Flag to indicate data reception
 
-void onRequest() {
-  Wire.print(i++);
-  Wire.print(" Packets.");
-  Serial.println("onRequest");
-  Serial.println();
-}
+#include "driver/gpio.h"
 
-void onReceive(int len) {
-  // Serial.printf("Recived Data of [%d]: ", len);
-  Serial.printf("Recived Data: ");
-  while (Wire.available()) {
-    Serial.write(Wire.read());
-  }
-  Serial.println();
+void enableInternalPullups() {
+    gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);  // SDA (default GPIO 8)
+    gpio_set_pull_mode(GPIO_NUM_5, GPIO_PULLUP_ONLY);  // SCL (default GPIO 9)
 }
 
 void setup() {
+  // Wire.begin(SLAVE_ADDRESS, SDA_PIN, SCL_PIN); 
+  // Wire.begin(80, SCL_PIN, SDA_PIN, 0);
+  // Wire.setPins(SDA_PIN, SCL_PIN);
+  enableInternalPullups();
+  Wire.begin(SLAVE_ADDRESS, SDA_PIN, SCL_PIN, 10000); 
+  // pinMode(SDA_PIN, INPUT_PULLUP);
+  // pinMode(SCL_PIN, INPUT_PULLUP); 
+  
+  Wire.onReceive(onReceive); 
+  Wire.onRequest(onRequest); 
+  Serial.println(Wire.available());
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  Wire.onReceive(onReceive);
-  Wire.onRequest(onRequest);
-  // Wire.begin((uint8_t)I2C_ADDR_32_H2);
-  Wire.begin((uint8_t)I2C_ADDR_32_H2, 5, 4, 100000);
-  // Wire.begin(5, 4);
+  Serial.println("I2C Slave Initialized");
 }
 
-/*#if CONFIG_IDF_TARGET_ESP32
-  char message[64];
-  snprintf(message, 64, "%lu Packets.", i++);
-  Wire.slaveWrite((uint8_t *)message, strlen(message));
-  Serial.print('Printing config %lu', i);
-#endif*/
-
 void loop() {
-  // Wire.print(i++);
-  // Wire.print(" Packets.");
+  if (dataAvailable) {
+    Serial.print("Received data: ");
+    Serial.println(receivedData);
+    dataAvailable = false; // Reset the flag after processing the data
+  }
+  // Serial.println(SDA);
+  // Serial.println(SCL);
+  delay(100); // Small delay to avoid flooding the serial monitor
+}
+
+// Function to handle data received from the master
+void onReceive(int numBytes) {
+  if (Wire.available()) {
+    receivedData = Wire.read(); // Read the first byte of data
+    dataAvailable = true;       // Set the flag to indicate data is available
+  }
+}
+
+// Function to handle data requested by the master
+void onRequest() {
+  int response = receivedData + 1; // Example response: increment received data
+  Wire.write(response);           // Send the response back to the master
 }
