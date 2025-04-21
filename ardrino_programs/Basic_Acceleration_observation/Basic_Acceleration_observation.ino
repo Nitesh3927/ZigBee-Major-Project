@@ -31,7 +31,7 @@ void i2cRead(uint8_t reg, uint8_t count, uint8_t *data) {
 
 void setup() {
     Wire.begin();
-    Serial.begin(115200);
+    Serial.begin(921600);
 
     // Power Management
     i2cWrite(PWR_MGMT_1, 0x00);
@@ -82,20 +82,36 @@ void setup() {
 }
 
 void loop() {
-    uint8_t rawData[6];
-    i2cRead(ACCEL_XOUT_H, 6, rawData);
+  uint8_t rawData[6];
+  i2cRead(ACCEL_XOUT_H, 6, rawData);
+  
+  int16_t raw_acc_x = (rawData[0] << 8) | rawData[1];
+  int16_t raw_acc_y = (rawData[2] << 8) | rawData[3];
+  int16_t raw_acc_z = (rawData[4] << 8) | rawData[5];
+  
+  float acc_x = (float)raw_acc_x / scale_factor;
+  float acc_y = (float)raw_acc_y / scale_factor;
+  float acc_z = (float)raw_acc_z / scale_factor;
+
+  
+  // Serial.print("Acc X: "); Serial.print(acc_x, 7);
+  // Serial.print(" | Acc Y: "); Serial.print(acc_y, 7);
+  // Serial.print(" | Acc Z: "); Serial.println(acc_z, 7);
+
+  // float X_out = acc_x;
+  // float Y_out = acc_y;
+  // float Z_out = acc_z;
+  
+  // Serial.print("Time_Stamp= "); 
+  // Serial.print(millis()/1000.0, 3);
+  // Serial.print(" Xa= "); 
+  // Serial.print(X_out, 7); 
+  // Serial.print("   Ya= "); 
+  // Serial.print(Y_out, 7); 
+  // Serial.print("   Za= "); 
+  // Serial.println(Z_out, 7); 
+
+  Serial.printf("%0.3f | %.7f | %.7f | %.7f\n", millis()/1000.0, acc_x, acc_y, acc_z);
     
-    int16_t raw_acc_x = (rawData[0] << 8) | rawData[1];
-    int16_t raw_acc_y = (rawData[2] << 8) | rawData[3];
-    int16_t raw_acc_z = (rawData[4] << 8) | rawData[5];
-    
-    float acc_x = (float)raw_acc_x / scale_factor;
-    float acc_y = (float)raw_acc_y / scale_factor;
-    float acc_z = (float)raw_acc_z / scale_factor;
-    
-    Serial.print("Acc X: "); Serial.print(acc_x);
-    Serial.print(" | Acc Y: "); Serial.print(acc_y);
-    Serial.print(" | Acc Z: "); Serial.println(acc_z);
-    
-    delay(200);
+    // delay(10);
 }

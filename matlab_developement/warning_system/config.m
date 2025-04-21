@@ -82,9 +82,9 @@ disp('📢 MPU6050 Configuration Parameters Loaded.');
 
 %% ==================== TIME STEP SETUP ====================
 MPU_TS = 0.1;
-GPS_TS = 0.5;
+GPS_TS = 1;
 MODEL_TS = 0.1;
 READER_TS = 0.5;
-CORE_TS = 0.1;
+CORE_TS = 0.2;
 
 disp('📢 TIME STEPS LOADED.');
