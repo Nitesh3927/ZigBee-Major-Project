@@ -21,3 +21,6 @@ typedef struct packet {
 #define CODE_SECURITY_POLICY false
 #define ZB_ZCL_CUSTOM_CLUSTER_ID 0xFC00U
 #define NWK_CHANNEL_MASK (1L << 18)
+
+// LED Strip Config Parameters
+#define LED_GPIO 8

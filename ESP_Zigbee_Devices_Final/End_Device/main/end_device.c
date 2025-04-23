@@ -12,9 +12,13 @@
 #include "zcl/esp_zigbee_zcl_command.h"
 #include "zcl/esp_zigbee_zcl_common.h"
 
+#include "led_strip.h"
+#include "driver/gpio.h"
+
 #include "end_device_config.h"
 
 static const char *TAG = "ESP_ZB_END_DEVICE";
+static led_strip_handle_t led_strip;
 
 void send_data(packet *data_to_send)
 {
@@ -49,10 +53,20 @@ static void slave_data_read_task()
   packet buffer;
   while (true) {
     int buffer_size = i2c_slave_read_buffer(I2C_NUM_0, (uint8_t *)&buffer, sizeof(packet), pdMS_TO_TICKS(500));
-    printf("%d", buffer_size);
     if (buffer_size == sizeof(packet)) {
-      buffer.zigbeeAddress = esp_zb_get_pan_id();
-      send_data(&buffer);
+      if (buffer.status == 128) { // Car has crashed
+        led_strip_set_pixel(led_strip, 0, 255, 0, 0);
+        led_strip_refresh(led_strip);
+        buffer.zigbeeAddress = (uint32_t)esp_zb_get_short_address();
+        send_data(&buffer);
+      } else if (buffer.status == 32) { // A nearby Crash was detected
+        led_strip_set_pixel(led_strip, 0, 255, 255, 0);
+        led_strip_refresh(led_strip);
+      } else {
+        led_strip_set_pixel(led_strip, 0, 0, 255, 0);
+        led_strip_refresh(led_strip);
+      }
+      vTaskDelay(500 / portTICK_PERIOD_MS);
     }
   }
 }
@@ -63,21 +77,18 @@ static esp_err_t zb_custom_cluster_handler(const esp_zb_zcl_custom_cluster_comma
     ESP_RETURN_ON_FALSE(message, ESP_FAIL, TAG, "Empty message");
     ESP_RETURN_ON_FALSE(message->info.status == ESP_ZB_ZCL_STATUS_SUCCESS, ESP_ERR_INVALID_ARG, TAG, "Received message: error status(%d)",
                         message->info.status);
-    printf("Receive(%d): \n", message->data.size);
     uint8_t *val = (uint8_t *)message->data.value;
     memcpy(&received_packet, &val[1], sizeof(packet));
-    // printf("%lu\n", received_packet.zigbeeAddress);
-    // printf("%lu\n", (uint32_t)esp_zb_get_pan_id());
-    // printf("%lu\n", (uint32_t)message->info.src_address.u.short_addr);
-    // if (received_packet.zigbeeAddress != esp_zb_get_pan_id()) {
-    printf("Received data: lat=%f, lon=%f, speed=%f, status=%u, addr=%lu\n",
-      received_packet.latitude,
-      received_packet.longitude,
-      received_packet.speed,
-      received_packet.status,
-      received_packet.zigbeeAddress);
-    i2c_slave_write_buffer(I2C_NUM_0, (uint8_t *)&received_packet, sizeof(packet), pdMS_TO_TICKS(500));
-    // }
+    if (received_packet.zigbeeAddress != esp_zb_get_short_address()) {
+      printf("Received data(%d): lat=%f, lon=%f, speed=%f, status=%u, addr=%lu\n",
+        message->data.size,
+        received_packet.latitude,
+        received_packet.longitude,
+        received_packet.speed,
+        received_packet.status,
+        received_packet.zigbeeAddress);
+      i2c_slave_write_buffer(I2C_NUM_0, (uint8_t *)&received_packet, sizeof(packet), pdMS_TO_TICKS(500));
+    }
     return ESP_OK;
 }
 
@@ -173,8 +184,22 @@ static void esp_zb_task(void *pvParameters)
 
     esp_zb_core_action_handler_register(zb_action_handler);
     esp_zb_set_primary_network_channel_set(NWK_CHANNEL_MASK);
+    esp_zb_nvram_erase_at_start(1);
     ESP_ERROR_CHECK(esp_zb_start(false));
     esp_zb_stack_main_loop();
+}
+
+static void configure_led(void) {
+  led_strip_config_t strip_config = {
+    .max_leds = 1,
+    .strip_gpio_num = LED_GPIO,
+  };
+  led_strip_rmt_config_t rmt_config = {
+    .resolution_hz = 0,
+    .flags.with_dma = false,
+  };
+  ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+  led_strip_clear(led_strip);
 }
 
 void app_main(void)
@@ -208,9 +233,14 @@ void app_main(void)
   ESP_ERROR_CHECK(nvs_flash_init());
   ESP_ERROR_CHECK(esp_zb_platform_config(&config));
 
+  // LED Strip Config
+  configure_led();
+
   xTaskCreate(esp_zb_task, "Zigbee_main", 4096, NULL, 5, NULL);
 
   vTaskDelay(3000 / portTICK_PERIOD_MS);
+  led_strip_set_pixel(led_strip, 0, 0, 255, 0);
+  led_strip_refresh(led_strip);
 
   xTaskCreate(slave_data_read_task, "Data_Read_Task", 4096, NULL, 6, NULL);
 }
