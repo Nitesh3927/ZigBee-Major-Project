@@ -25,7 +25,7 @@ void send_data(packet *data_to_send)
   uint8_t buffer[sizeof(packet) + 1];
   buffer[0] = sizeof(packet);
   memcpy(&buffer[1], data_to_send, sizeof(packet));
-
+  
   esp_zb_zcl_custom_cluster_cmd_req_t custom_req = {
     .zcl_basic_cmd = {
       .dst_addr_u.addr_short = 0xFFFF, // Broadcast Address (Max data size 50)
@@ -51,22 +51,39 @@ static void slave_data_read_task()
 {
   packet buffer;
   while (true) {
-    int buffer_size = i2c_slave_read_buffer(I2C_NUM_0, (uint8_t *)&buffer, sizeof(packet), pdMS_TO_TICKS(500));
+    int buffer_size = i2c_slave_read_buffer(I2C_NUM_0, (uint8_t *)&buffer, sizeof(packet), pdMS_TO_TICKS(100));
     if (buffer_size == sizeof(packet)) {
-      if (buffer.status == 128) { // Car has crashed
-        led_strip_set_pixel(led_strip, 0, 255, 0, 0);
-        led_strip_refresh(led_strip);
-        buffer.zigbeeAddress = (uint32_t)esp_zb_get_short_address();
-        send_data(&buffer);
-      } else if (buffer.status == 32) { // A nearby Crash was detected
-        led_strip_set_pixel(led_strip, 0, 255, 255, 0);
-        led_strip_refresh(led_strip);
-      } else {
-        led_strip_set_pixel(led_strip, 0, 0, 255, 0);
-        led_strip_refresh(led_strip);
+      printf("%u\n", buffer.status);
+      switch (buffer.status) {
+        case 128: // Car has crashed
+          led_strip_set_pixel(led_strip, 0, 5, 0, 0);
+          led_strip_refresh(led_strip);
+          buffer.zigbeeAddress = (uint32_t)esp_zb_get_short_address();
+          send_data(&buffer);
+          break;
+        case 100: // Caution
+          led_strip_set_pixel(led_strip, 0, 100, 100, 0);
+          led_strip_refresh(led_strip);
+          break;
+        case 32: // A nearby Crash was detected
+          led_strip_set_pixel(led_strip, 0, 5, 5, 0);
+          led_strip_refresh(led_strip);
+          break;
+        case 16: // Lane Change Left
+          led_strip_set_pixel(led_strip, 0, 0, 20, 20);
+          led_strip_refresh(led_strip);
+          break;
+        case 8: // Lane Change Right
+          led_strip_set_pixel(led_strip, 0, 20, 5, 50);
+          led_strip_refresh(led_strip);
+          break;
+        case 4: // Normal Operation
+          led_strip_set_pixel(led_strip, 0, 0, 5, 0);
+          led_strip_refresh(led_strip);
+          break;
       }
-      vTaskDelay(500 / portTICK_PERIOD_MS);
     }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
@@ -163,6 +180,7 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_s) {
 }
 
 static void esp_zb_task(void *pvParameters) {
+  esp_zb_io_buffer_size_set(1600);
   esp_zb_cfg_t zb_nwk_cfg = {
     .esp_zb_role = ESP_ZB_DEVICE_TYPE_COORDINATOR,
     .install_code_policy = CODE_SECURITY_POLICY,
@@ -205,6 +223,7 @@ static void configure_led(void) {
     .strip_gpio_num = LED_GPIO,
   };
   led_strip_rmt_config_t rmt_config = {
+    .clk_src = RMT_CLK_SRC_DEFAULT,
     .resolution_hz = 0,
     .flags.with_dma = false,
   };
@@ -228,7 +247,7 @@ void app_main(void)
   };
 
   ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &i2c_slave_config));
-  ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_SLAVE, 128, 128, 0));
+  ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_SLAVE, 120, 120, 0));
 
   // Zigbee Device Config
   esp_zb_platform_config_t config = {
@@ -246,11 +265,11 @@ void app_main(void)
   // LED Strip Config
   configure_led();
 
-  xTaskCreate(esp_zb_task, "Zigbee_Task", 4096, NULL, 5, NULL);
+  xTaskCreate(esp_zb_task, "Zigbee_Task", 4096, NULL, 20, NULL);
 
-  vTaskDelay(3000 / portTICK_PERIOD_MS);
-  led_strip_set_pixel(led_strip, 0, 0, 255, 0);
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  led_strip_set_pixel(led_strip, 0, 5, 5, 5);
   led_strip_refresh(led_strip);
 
-  xTaskCreate(slave_data_read_task, "Data_Read_Task", 4096, NULL, 10, NULL);
+  xTaskCreate(slave_data_read_task, "Data_Read_Task", 4096, NULL, 1, NULL);
 }

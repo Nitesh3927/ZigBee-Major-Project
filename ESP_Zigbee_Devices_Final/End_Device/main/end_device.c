@@ -52,22 +52,39 @@ static void slave_data_read_task()
 {
   packet buffer;
   while (true) {
-    int buffer_size = i2c_slave_read_buffer(I2C_NUM_0, (uint8_t *)&buffer, sizeof(packet), pdMS_TO_TICKS(500));
+    int buffer_size = i2c_slave_read_buffer(I2C_NUM_0, (uint8_t *)&buffer, sizeof(packet), pdMS_TO_TICKS(100));
     if (buffer_size == sizeof(packet)) {
-      if (buffer.status == 128) { // Car has crashed
-        led_strip_set_pixel(led_strip, 0, 255, 0, 0);
-        led_strip_refresh(led_strip);
-        buffer.zigbeeAddress = (uint32_t)esp_zb_get_short_address();
-        send_data(&buffer);
-      } else if (buffer.status == 32) { // A nearby Crash was detected
-        led_strip_set_pixel(led_strip, 0, 255, 255, 0);
-        led_strip_refresh(led_strip);
-      } else {
-        led_strip_set_pixel(led_strip, 0, 0, 255, 0);
-        led_strip_refresh(led_strip);
+      printf("%u\n", buffer.status);
+      switch (buffer.status) {
+        case 128: // Car has crashed
+          led_strip_set_pixel(led_strip, 0, 5, 0, 0);
+          led_strip_refresh(led_strip);
+          buffer.zigbeeAddress = (uint32_t)esp_zb_get_short_address();
+          send_data(&buffer);
+          break;
+        case 100: // Caution
+          led_strip_set_pixel(led_strip, 0, 100, 100, 0);
+          led_strip_refresh(led_strip);
+          break;
+        case 32: // A nearby Crash was detected
+          led_strip_set_pixel(led_strip, 0, 5, 5, 0);
+          led_strip_refresh(led_strip);
+          break;
+        case 16: // Lane Change Left
+          led_strip_set_pixel(led_strip, 0, 0, 20, 20);
+          led_strip_refresh(led_strip);
+          break;
+        case 8: // Lane Change Right
+          led_strip_set_pixel(led_strip, 0, 20, 5, 50);
+          led_strip_refresh(led_strip);
+          break;
+        case 4: // Normal Operation
+          led_strip_set_pixel(led_strip, 0, 0, 5, 0);
+          led_strip_refresh(led_strip);
+          break;
       }
-      vTaskDelay(500 / portTICK_PERIOD_MS);
     }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
 
@@ -152,41 +169,42 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
 
 static void esp_zb_task(void *pvParameters)
 {
-    esp_zb_cfg_t zb_nwk_cfg = {   
-      .esp_zb_role = ESP_ZB_DEVICE_TYPE_ED,
-      .install_code_policy = CODE_SECURITY_POLICY,
-      .nwk_cfg.zed_cfg.keep_alive = KEEP_ALIVE, 
-    };
-    esp_zb_init(&zb_nwk_cfg);
+  esp_zb_io_buffer_size_set(1600);
+  esp_zb_cfg_t zb_nwk_cfg = {   
+    .esp_zb_role = ESP_ZB_DEVICE_TYPE_ED,
+    .install_code_policy = CODE_SECURITY_POLICY,
+    .nwk_cfg.zed_cfg.keep_alive = KEEP_ALIVE, 
+  };
+  esp_zb_init(&zb_nwk_cfg);
 
-    esp_zb_ep_list_t *ep_list = esp_zb_ep_list_create();
-    esp_zb_cluster_list_t *cluster_list = esp_zb_zcl_cluster_list_create();
-    esp_zb_attribute_list_t *custom_attr_list = esp_zb_zcl_attr_list_create(ZB_ZCL_CUSTOM_CLUSTER_ID);
+  esp_zb_ep_list_t *ep_list = esp_zb_ep_list_create();
+  esp_zb_cluster_list_t *cluster_list = esp_zb_zcl_cluster_list_create();
+  esp_zb_attribute_list_t *custom_attr_list = esp_zb_zcl_attr_list_create(ZB_ZCL_CUSTOM_CLUSTER_ID);
 
-    packet custom_packet = {
-      .latitude = 1.0f,
-      .longitude = 1.0f,
-      .speed = 1.0f,
-      .status = 'W',
-      .zigbeeAddress = 0xFFFFUL,
-    };
-    esp_zb_custom_cluster_add_custom_attr(custom_attr_list, 0x0001, ESP_ZB_ZCL_ATTR_TYPE_STRUCTURE, ESP_ZB_ZCL_ATTR_ACCESS_READ_WRITE, &custom_packet);
-    esp_zb_cluster_list_add_custom_cluster(cluster_list, custom_attr_list, ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);
+  packet custom_packet = {
+    .latitude = 1.0f,
+    .longitude = 1.0f,
+    .speed = 1.0f,
+    .status = 'W',
+    .zigbeeAddress = 0xFFFFUL,
+  };
+  esp_zb_custom_cluster_add_custom_attr(custom_attr_list, 0x0001, ESP_ZB_ZCL_ATTR_TYPE_STRUCTURE, ESP_ZB_ZCL_ATTR_ACCESS_READ_WRITE, &custom_packet);
+  esp_zb_cluster_list_add_custom_cluster(cluster_list, custom_attr_list, ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE);
 
-    esp_zb_endpoint_config_t endpoint_config = {
-        .endpoint = END_DEVICE_END_POINT,
-        .app_profile_id = ESP_ZB_AF_HA_PROFILE_ID,
-        .app_device_id = ESP_ZB_HA_CUSTOM_ATTR_DEVICE_ID,
-        .app_device_version = 0,
-    };
-    esp_zb_ep_list_add_ep(ep_list, cluster_list, endpoint_config);
-    esp_zb_device_register(ep_list);
+  esp_zb_endpoint_config_t endpoint_config = {
+      .endpoint = END_DEVICE_END_POINT,
+      .app_profile_id = ESP_ZB_AF_HA_PROFILE_ID,
+      .app_device_id = ESP_ZB_HA_CUSTOM_ATTR_DEVICE_ID,
+      .app_device_version = 0,
+  };
+  esp_zb_ep_list_add_ep(ep_list, cluster_list, endpoint_config);
+  esp_zb_device_register(ep_list);
 
-    esp_zb_core_action_handler_register(zb_action_handler);
-    esp_zb_set_primary_network_channel_set(NWK_CHANNEL_MASK);
-    esp_zb_nvram_erase_at_start(1);
-    ESP_ERROR_CHECK(esp_zb_start(false));
-    esp_zb_stack_main_loop();
+  esp_zb_core_action_handler_register(zb_action_handler);
+  esp_zb_set_primary_network_channel_set(NWK_CHANNEL_MASK);
+  esp_zb_nvram_erase_at_start(1);
+  ESP_ERROR_CHECK(esp_zb_start(false));
+  esp_zb_stack_main_loop();
 }
 
 static void configure_led(void) {
@@ -236,11 +254,11 @@ void app_main(void)
   // LED Strip Config
   configure_led();
 
-  xTaskCreate(esp_zb_task, "Zigbee_main", 4096, NULL, 5, NULL);
+  xTaskCreate(esp_zb_task, "Zigbee_main", 4096, NULL, 20, NULL);
 
   vTaskDelay(3000 / portTICK_PERIOD_MS);
-  led_strip_set_pixel(led_strip, 0, 0, 255, 0);
+  led_strip_set_pixel(led_strip, 0, 5, 5, 5);
   led_strip_refresh(led_strip);
 
-  xTaskCreate(slave_data_read_task, "Data_Read_Task", 4096, NULL, 6, NULL);
+  xTaskCreate(slave_data_read_task, "Data_Read_Task", 4096, NULL, 1, NULL);
 }
