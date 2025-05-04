@@ -6,8 +6,8 @@
 #ifdef __cplusplus
 extern "C" {
     #endif
-    void stepFunctionaccleration_reader(double * acc_x,int size_vector_1,double * acc_y,int size_vector_2,double * acc_z,int size_vector_3);
-    void setupFunctionaccleration_reader(uint8_T  ACCEL_RANGE,int size_vector__1,boolean_T  ENABLE_GYRO,int size_vector__2,uint8_T  DLPF_SETTING,int size_vector__3);
+    void stepFunctionGPS_Parser(double * Lat,int size_vector_1,double * Lng,int size_vector_2,double * Speed,int size_vector_3);
+    void setupFunctionGPS_Parser();
     #ifdef __cplusplus
 }
 #endif

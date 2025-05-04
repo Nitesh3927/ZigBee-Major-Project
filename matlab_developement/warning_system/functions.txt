@@ -1,0 +1,50 @@
+function y = lane_changed
+
+y = 0;
+
+if (acc_calibrated.X > THRESHOLD_LANE_CHANGE)
+    y = 1; 
+elseif (acc_calibrated.X < -THRESHOLD_LANE_CHANGE)
+    y = -1;
+end
+
+
+function y = is_caution
+ 
+
+if (abs(DELTA.Y) >= THRESHOLD_CAUTION)
+   
+    y = true; 
+else 
+    y = false;
+end
+
+
+function y = is_rest
+
+if (abs(DELTA.X) >= THRESHOLD_REST &&...
+    abs(DELTA.Y) >= THRESHOLD_REST &&...
+    abs(DELTA.Z) >= THRESHOLD_REST )
+    y = true; 
+else 
+    y = false;
+end
+
+
+function y = is_crashed
+
+if (abs(DELTA.Y) >= THRESHOLD_CRASHED)
+    y = true; 
+else 
+    y = false;
+end
+
+function count = OFFSET_MISMATCH(COUNT_CALIBRATION)
+
+count = COUNT_CALIBRATION;
+if(abs(acc_raw.X - acc_offset.X) > 0.01 && ...
+   abs(acc_raw.Y - acc_offset.Y) > 0.01 && ...
+   abs(acc_raw.Z - acc_offset.Z) > 0.01)
+
+    count = COUNT_CALIBRATION +1;
+end

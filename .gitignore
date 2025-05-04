@@ -4,6 +4,7 @@
 build
 managed_components
 .cache
+resources
 
 sdkconfig.defaults.esp32
 sdkconfig.defaults.esp32c3
@@ -33,3 +34,11 @@ IDF_framwork/HA_on_off_switch/sdkconfig.old
 *.json
 *.md
 .venv
+
+
+
+matlab_developement/warning_system/resources/
+
+# */matlab_developement/warning_system/resources
+
+

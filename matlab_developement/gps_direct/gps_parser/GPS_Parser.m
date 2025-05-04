@@ -1,8 +1,8 @@
-classdef accleration_reader < matlab.System ...
+classdef GPS_Parser < matlab.System ...
         & coder.ExternalDependency ...
         & matlabshared.sensors.simulink.internal.BlockSampleTime
 
-    %
+    % Computes GPS data
     %#codegen
     %#ok<*EMCA>
 
@@ -15,9 +15,7 @@ classdef accleration_reader < matlab.System ...
     end
 
     properties (Nontunable)
-        ACCEL_RANGE = uint8(4);
-        ENABLE_GYRO = boolean(0);
-        DLPF_SETTING = uint8(6);
+
     end
 
     properties (Access = private)
@@ -27,7 +25,7 @@ classdef accleration_reader < matlab.System ...
 
     methods
         % Constructor
-        function obj = accleration_reader(varargin)
+        function obj = GPS_Parser(varargin)
             setProperties(obj,nargin,varargin{:});
         end
     end
@@ -35,8 +33,8 @@ classdef accleration_reader < matlab.System ...
     methods (Access=protected)
         function setupImpl(obj)
             if ~coder.target('MATLAB')
-                coder.cinclude('accleration_reader.h');
-                coder.ceval('setupFunctionaccleration_reader', (obj.ACCEL_RANGE),1, (obj.ENABLE_GYRO),1, (obj.DLPF_SETTING),1);
+                coder.cinclude('GPS_Parser.h');
+                coder.ceval('setupFunctionGPS_Parser');
             end
         end
 
@@ -49,13 +47,13 @@ classdef accleration_reader < matlab.System ...
             end
         end
 
-        function [acc_x,acc_y,acc_z] = stepImpl(obj)
-            acc_x = double(zeros(1,1));
-            acc_y = double(zeros(1,1));
-            acc_z = double(zeros(1,1));
+        function [Lat,Lng,Speed] = stepImpl(obj)
+            Lat = double(zeros(1,1));
+            Lng = double(zeros(1,1));
+            Speed = double(zeros(1,1));
             if isempty(coder.target)
             else
-                coder.ceval('stepFunctionaccleration_reader',coder.ref(acc_x),1,coder.ref(acc_y),1,coder.ref(acc_z),1);
+                coder.ceval('stepFunctionGPS_Parser',coder.ref(Lat),1,coder.ref(Lng),1,coder.ref(Speed),1);
             end
         end
 
@@ -82,9 +80,9 @@ classdef accleration_reader < matlab.System ...
         end
 
         function varargout = getOutputNamesImpl(obj)
-            varargout{1} = 'acc_x';
-            varargout{2} = 'acc_y';
-            varargout{3} = 'acc_z';
+            varargout{1} = 'Lat';
+            varargout{2} = 'Lng';
+            varargout{3} = 'Speed';
         end
 
         function flag = isOutputSizeLockedImpl(~,~)
@@ -134,7 +132,7 @@ classdef accleration_reader < matlab.System ...
                     inport_label = [inport_label 'port_label(''input'',' num2str(i) ',''' inputs{i} ''');' ]; %#ok<AGROW>
                 end
             end
-            icon = 'accleration_reader';
+            icon = 'GPS_Parser';
             maskDisplayCmds = [ ...
                 ['color(''white'');',...
                 'plot([100,100,100,100]*1,[100,100,100,100]*1);',...
@@ -165,7 +163,7 @@ classdef accleration_reader < matlab.System ...
 
     methods (Static)
         function name = getDescriptiveName(~)
-            name = 'accleration_reader';
+            name = 'GPS_Parser';
         end
 
         function tf = isSupportedContext(~)
@@ -184,9 +182,11 @@ classdef accleration_reader < matlab.System ...
                 setenv('Arduino_ML_Codegen_I2C', 'Y');
             end
 
+            buildInfo.addIncludePaths('C:\Users\Nitesh\Documents\Arduino\libraries\TinyGPSPlus\src');
 
-            buildInfo.addIncludePaths('C:\Users\Nitesh\Documents\GitHubDump\ZigBee_Major_Project\matlab_developement\bulider_system\acc_observer');
-            addSourceFiles(buildInfo,'accleration_reader.cpp','C:\Users\Nitesh\Documents\GitHubDump\ZigBee_Major_Project\matlab_developement\bulider_system\acc_observer');
+            buildInfo.addIncludePaths('C:\Users\Nitesh\Documents\GitHubDump\ZigBee_Major_Project\matlab_developement\gps_direct\gps_parser');
+            addSourceFiles(buildInfo,'TinyGPS++.cpp','C:\Users\Nitesh\Documents\Arduino\libraries\TinyGPSPlus\src');
+            addSourceFiles(buildInfo,'GPS_Parser.cpp','C:\Users\Nitesh\Documents\GitHubDump\ZigBee_Major_Project\matlab_developement\gps_direct\gps_parser');
 
         end
     end
