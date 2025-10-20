@@ -17,8 +17,12 @@ void setupFunctionGPS_Parser(){
 // Speed double [1,1]
 
 
-void stepFunctionGPS_Parser(double * Lat,int size_vector_1,double * Lng,int size_vector_2,double * Speed,int size_vector_3){
-    while (Serial2.available() > 0) {
+void stepFunctionGPS_Parser(
+    double * Lat,int size_vector_1,
+    double * Lng,int size_vector_2,
+    double * Speed,int size_vector_3){
+    
+        while (Serial2.available() > 0) {
         char c = Serial2.read();
         gps.encode(c);   // Parse the data
     }

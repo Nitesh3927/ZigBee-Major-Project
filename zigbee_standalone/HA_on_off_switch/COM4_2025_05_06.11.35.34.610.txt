@@ -1,0 +1,162 @@
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+209
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+214
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+234
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+244
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+239
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+234
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+234
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+234
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+229
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+224
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+Data Sent: 0.000000, 0.000000, 0.000000, 128, 33979
+219
+209
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+198
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+214
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+209
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+209
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+209
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+214
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+214
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+219
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+219
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+204
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+204
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+204
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+198
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+173
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+173
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+209
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+224
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+239
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+224
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+219
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+214
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+204
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0
+229
+Received data(16): lat=36.458752, lon=80.542137, speed=15.458796, status=128, addr=0

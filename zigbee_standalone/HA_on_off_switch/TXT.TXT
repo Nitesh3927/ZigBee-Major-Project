@@ -1,0 +1,1 @@
+formatted = sprintf([ '%s (%d) || TRANSMIT: %d || (%.7f, %.7f, %.3f) || RECEIVING: %d || (%.7f, %.7f, %.3f)'])

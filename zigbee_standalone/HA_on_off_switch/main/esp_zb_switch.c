@@ -46,7 +46,7 @@ static void send_data(packet *data_to_send)
     custom_req.data.type = ESP_ZB_ZCL_ATTR_TYPE_OCTET_STRING;
     custom_req.data.value = buffer;
     custom_req.data.size = sizeof(packet);
-    printf("Data Sent: %2f, %2f, %2f, %u, %d\n", data_to_send->latitude, data_to_send->longitude, data_to_send->speed, data_to_send->status, data_to_send->zigbeeAddress);
+    printf("ZB Data Sent: %2f, %2f, %2f, %u, %d\n", data_to_send->latitude, data_to_send->longitude, data_to_send->speed, data_to_send->status, data_to_send->zigbeeAddress);
     esp_zb_zcl_custom_cluster_cmd_req(&custom_req);
 }
 
@@ -56,6 +56,7 @@ static void slave_data_read_task()
   while (true) {
     int buffer_size = i2c_slave_read_buffer(I2C_NUM_0, (uint8_t *)&buffer, sizeof(packet), pdMS_TO_TICKS(100));
     if (buffer_size == sizeof(packet)) {
+        printf("Data Received: %2f, %2f, %2f, %u, %d\n", buffer.latitude, buffer.longitude, buffer.speed, buffer.status, buffer.zigbeeAddress);
       // printf("%u\n", buffer.status);
       switch (buffer.status) {
         case 128: // Car has crashed
