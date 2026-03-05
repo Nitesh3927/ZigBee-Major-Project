@@ -3,11 +3,15 @@ Zigbee based Machine to Machine Communication for On-road Low-visibility Collisi
 <img width="1403" height="784" alt="Screenshot 2026-03-05 at 8 48 01 PM" src="https://github.com/user-attachments/assets/3fa9b99a-6c09-4fd4-92e4-6868d7e530d0" />
 
 THIS PROJECT AIMS TO ACCOMPLISH THE FOLLOWING:
+
 1.Vehicle-to-vehicle (V2V) communication to enhance transportation safety and efficiency, especially in adverse conditions like snowstorm or smog where traditional navigation aids often fail.
+
 2.Zigbee, a low-power and cost-effective protocol, to be integrated with ESP32-H2 micro controllers to establish reliable short-range wireless communication between vehicles.
+
 3. To use GPS modules (Neo-6M) for real-time location tracking and acceleration monitoring (MPU-6050) for motion monitoring, ensuring precise and timely data exchange.
 
 A high level overview:
+
 <img width="574" height="396" alt="Screenshot 2026-03-05 at 8 48 52 PM" src="https://github.com/user-attachments/assets/41fded1d-fd06-4b83-9db1-43627eded5d1" />
 
 1.	Sensors collect data
