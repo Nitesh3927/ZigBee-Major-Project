@@ -184,9 +184,9 @@ classdef GPS_Parser < matlab.System ...
 
             buildInfo.addIncludePaths('C:\Users\Nitesh\Documents\Arduino\libraries\TinyGPSPlus\src');
 
-            buildInfo.addIncludePaths('C:\Users\Nitesh\Documents\GitHubDump\ZigBee_Major_Project\matlab_developement\warning_system\gps_parser');
-            addSourceFiles(buildInfo,'TinyGPS++.cpp','C:\Users\Nitesh\Documents\Arduino\libraries\TinyGPSPlus\src');
-            addSourceFiles(buildInfo,'GPS_Parser.cpp','C:\Users\Nitesh\Documents\GitHubDump\ZigBee_Major_Project\matlab_developement\warning_system\gps_parser');
+            buildInfo.addIncludePaths('C:\Users\nites\Documents\GitHub\ZigBee-Major-Project\matlab_developement\warning_system\gps_parser');
+            addSourceFiles(buildInfo,'TinyGPS++.cpp','C:\Users\nites\Documents\GitHub\ZigBee-Major-Project\matlab_developement\warning_system\TinyGPSPlus\src');
+            addSourceFiles(buildInfo,'GPS_Parser.cpp','C:\Users\nites\Documents\GitHub\ZigBee-Major-Project\matlab_developement\warning_system\gps_parser');
 
         end
     end
