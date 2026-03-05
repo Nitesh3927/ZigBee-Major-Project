@@ -1,2 +1,1 @@
-# ZigBee-Major_Project
- idk still working on it
+Zigbee based Machine to Machine Communication for On-road Low-visibility Collision Prevention
