@@ -15,7 +15,7 @@ Welcome to the organized ZigBee Vehicle-to-Vehicle Communication System project!
    - Understand the system design and workflow
    - *Start here for best understanding*
 
-2. **[01_Setup_Configuration/README.md](01_Setup_Configuration/README.md)**
+2. **[01_Setup_Configuration/README.md](01_Setup_Configuration/SETUP_GUIDE.md)**
    - Environment setup and configuration instructions
    - Links to all necessary documentation
    - Setup checklist
