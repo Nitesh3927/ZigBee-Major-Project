@@ -4,14 +4,6 @@ This folder contains all configuration files and setup instructions needed to ge
 
 ## Contents
 
-### 📄 README.md (original)
-The original project overview containing:
-- Project objectives and goals
-- High-level architecture overview
-- Physical circuit diagrams
-- System flowcharts
-- Vehicular Status Packet (VSP) structure
-
 **Start here** to understand the project scope and design.
 
 ### 📄 MATLAB_ESP_setup.txt
